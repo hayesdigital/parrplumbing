@@ -165,3 +165,9 @@ table.compare tr:last-child td{border-bottom:0}
 }
 .skip{position:absolute;left:-9999px}
 .skip:focus{left:12px;top:12px;z-index:99;background:#fff;padding:8px 12px}
+/* call / text card */
+.contact-card .btn.big{width:100%;justify-content:center;margin-top:10px;font-size:1.12rem;padding:17px 20px}
+.contact-card .tip{font-size:.9rem;color:var(--muted);margin-top:14px;background:#fbf7e3;border-radius:8px;padding:10px 12px}
+.contact-card .cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);font-size:.93rem}
+.contact-card .cc-grid b{display:block;color:var(--navy);margin-bottom:2px}
+.contact-card .cc-grid span{display:block;color:var(--muted)}

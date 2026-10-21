@@ -6,7 +6,10 @@ SITE = "https://parrplumbing.com"
 BIZ = "Parr Plumbing"
 PHONE = "(580) 304-4967"
 PHONE_TEL = "+15803044967"
-LEAD_EMAIL = "todd@toddhayes.com"   # FormSubmit destination
+SMS = "sms:+15803044967"
+TOWNS = ["Ponca City", "McCord", "Newkirk", "Tonkawa"]
+AREA = "Ponca City, McCord, Newkirk and Tonkawa"
+HOURS = "Monday to Saturday, 9 AM to 6 PM"
 LICENSE = "00141707"
 YEAR = 2026
 
@@ -35,7 +38,9 @@ BUSINESS = {
     "image": SITE + "/img/plumber-checking-water-heater-ponca-city-ok.webp",
     "logo": SITE + "/logo.png",
     "address": {"@type": "PostalAddress", "addressLocality": "Ponca City", "addressRegion": "OK", "addressCountry": "US"},
-    "areaServed": [{"@type": "City", "name": "Ponca City", "containedInPlace": {"@type": "State", "name": "Oklahoma"}}],
+    "areaServed": [{"@type": "City", "name": t + ", OK"} for t in ["Ponca City", "McCord", "Newkirk", "Tonkawa"]],
+    "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "opens": "09:00", "closes": "18:00"}],
+    "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_TEL, "contactType": "customer service", "contactOption": "Call or text", "areaServed": "US-OK", "availableLanguage": "English"},
     "founder": {"@type": "Person", "@id": SITE + "/#greg", "name": "Greg Parr", "jobTitle": "Owner and Licensed Plumbing Contractor", "url": SITE + "/about/"},
     "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license",
                       "name": "Oklahoma Plumbing Contractor License #" + LICENSE,
@@ -47,7 +52,7 @@ def service_schema(name, path, desc, stype):
     return {"@context": "https://schema.org", "@type": "Service", "name": name, "serviceType": stype,
             "url": SITE + path, "description": desc,
             "provider": {"@id": SITE + "/#business"},
-            "areaServed": {"@type": "City", "name": "Ponca City, OK"}}
+            "areaServed": [{"@type": "City", "name": t + ", OK"} for t in TOWNS]}
 
 def faq_schema(items):
     return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
@@ -85,8 +90,8 @@ def head(title, desc, path, schemas=(), og_image=OG_DEFAULT, robots=None):
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="topbar"><div class="container">
-  <span class="lic">Licensed Oklahoma Plumbing Contractor #{LICENSE} &middot; Ponca City, OK</span>
-  <span>Need a plumber? <a href="tel:{PHONE_TEL}">Call {PHONE}</a></span>
+  <span class="lic">Licensed Oklahoma Plumbing Contractor #{LICENSE} &middot; Mon to Sat, 9 AM to 6 PM</span>
+  <span>Call or text <a href="tel:{PHONE_TEL}">{PHONE}</a></span>
 </div></div>
 <header class="site-header"><div class="container">
   <a class="logo" href="/" aria-label="Parr Plumbing home">{LOGO}</a>
@@ -107,7 +112,7 @@ FOOT = f"""</main>
   <div class="cols">
     <div>
       <a class="logo" href="/" aria-label="Parr Plumbing home">{LOGO}</a>
-      <p style="margin-top:14px;max-width:44ch">Water heater repair and replacement, leak repair, garbage disposals, water filtration and everyday plumbing for homes and businesses in Ponca City, Oklahoma.</p>
+      <p style="margin-top:14px;max-width:44ch">Water heater repair and replacement, leak repair, garbage disposals, water filtration and everyday plumbing for homes and businesses in Ponca City, McCord, Newkirk and Tonkawa, Oklahoma.</p>
       <p style="margin-top:10px">Oklahoma Plumbing Contractor License #{LICENSE}</p>
     </div>
     <div><h3>Services</h3><ul>
@@ -120,45 +125,43 @@ FOOT = f"""</main>
     </ul></div>
     <div><h3>Parr Plumbing</h3><ul>
       <li><a href="tel:{PHONE_TEL}">{PHONE}</a></li>
-      <li>Serving Ponca City, OK and nearby communities</li>
+      <li>Text: <a href="{SMS}">{PHONE}</a></li>
+      <li>Mon to Sat: 9 AM to 6 PM<br>Sunday: Closed</li>
+      <li>Serving {AREA}, OK</li>
       <li><a href="/about/">About Greg Parr</a></li>
-      <li><a href="/contact/">Request Service</a></li>
+      <li><a href="/contact/">Contact</a></li>
     </ul></div>
   </div>
   <div class="bottom"><span>&copy; {YEAR} Parr Plumbing. All rights reserved. &middot; <a href="/privacy/">Privacy Policy</a></span><span>Website by <a href="https://toddhayes.com/">Hayes Digital Marketing</a></span></div>
 </div></footer>
-<div class="callbar"><a class="btn" href="tel:{PHONE_TEL}">{PHONE_ICO} Call Now</a><a class="btn dark" href="/contact/">Request Service</a></div>
+<div class="callbar"><a class="btn" href="tel:{PHONE_TEL}">{PHONE_ICO} Call Now</a><a class="btn dark" href="{SMS}">Text Us</a></div>
 </body>
 </html>
 """
 
-SERVICE_OPTIONS = ["Water heater repair", "Water heater replacement (tank or tankless)", "Leak repair", "Garbage disposal repair or replacement",
-                   "Water filtration / reverse osmosis system", "Other plumbing repair or install", "Commercial plumbing"]
+SMS_BODY = {
+    "Water heater repair": "Hi Greg, I need help with water heater repair.",
+    "Water heater replacement (tank or tankless)": "Hi Greg, I need a new water heater.",
+    "Leak repair": "Hi Greg, I have a plumbing leak.",
+    "Garbage disposal repair or replacement": "Hi Greg, my garbage disposal needs work.",
+    "Water filtration / reverse osmosis system": "Hi Greg, I'm interested in a water filtration system.",
+}
 
-def form(heading="Request service", sub="Tell us what's going on and we'll get back to you. In a hurry? Calling is fastest.", preselect=None):
-    opts = "".join(f'<option{" selected" if o == preselect else ""}>{o}</option>' for o in SERVICE_OPTIONS)
-    return f"""<div class="form-card" id="request">
+def sms_link(preselect=None):
+    body = SMS_BODY.get(preselect, "Hi Greg, I need a plumber.")
+    return SMS + "?&body=" + body.replace(" ", "%20").replace(",", "%2C").replace("'", "%27")
+
+def form(heading="Call or text Greg", sub="No forms, no call center. Call or text and you'll reach Greg directly.", preselect=None):
+    return f"""<div class="form-card contact-card" id="contact">
   <p class="h">{heading}</p>
   <p class="sub">{sub}</p>
-  <form action="https://formsubmit.co/{LEAD_EMAIL}" method="POST">
-    <input type="hidden" name="_subject" value="New Parr Plumbing service request">
-    <input type="hidden" name="_next" value="{SITE}/thank-you/" class="next-url">
-    <input type="hidden" name="_template" value="table">
-    <input type="hidden" name="_captcha" value="false">
-    <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <div class="row">
-      <div><label for="f-name">Your name</label><input id="f-name" name="name" required minlength="2" autocomplete="name"></div>
-      <div><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" pattern="[\\s()+.\\-]*([0-9][\\s()+.\\-]*){{10,11}}" title="Please enter a 10 digit phone number"></div>
-    </div>
-    <label for="f-email">Email (optional)</label><input id="f-email" name="email" type="email" autocomplete="email">
-    <label for="f-service">What do you need?</label>
-    <select id="f-service" name="service">{opts}</select>
-    <label for="f-msg">Tell us a little about it</label>
-    <textarea id="f-msg" name="message" placeholder="Example: 50 gallon gas water heater, no hot water since this morning"></textarea>
-    <button class="btn dark" type="submit">Send My Request</button>
-    <p class="fine">Prefer to talk? Call <a href="tel:{PHONE_TEL}">{PHONE}</a></p>
-  </form>
-  <script>document.querySelectorAll(".next-url").forEach(function(i){{i.value=location.origin+"/thank-you/";}});</script>
+  <a class="btn big" href="tel:{PHONE_TEL}">{PHONE_ICO} Call {PHONE}</a>
+  <a class="btn dark big" href="{sms_link(preselect)}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2z"/></svg> Text {PHONE}</a>
+  <p class="tip">Texting? Send a quick note about the problem and a photo if you can. It helps Greg show up ready.</p>
+  <div class="cc-grid">
+    <div><b>Hours</b><span>Mon to Sat: 9 AM to 6 PM</span><span>Sunday: Closed</span></div>
+    <div><b>Service area</b><span>Ponca City &middot; McCord</span><span>Newkirk &middot; Tonkawa</span></div>
+  </div>
 </div>"""
 
 def img(name, alt, cls="photo", eager=False, w=1400, h=789):
@@ -180,7 +183,7 @@ def hero(eyebrow, h1, lead, bg, bullets, trail=None, form_kw=None):
       <span class="eyebrow">{eyebrow}</span>
       <h1>{h1}</h1>
       <p class="lead">{lead}</p>
-      <div class="hero-cta"><a class="btn" href="tel:{PHONE_TEL}">{PHONE_ICO} Call {PHONE}</a><a class="btn ghost" href="#request">Request Service</a></div>
+      <div class="hero-cta"><a class="btn" href="tel:{PHONE_TEL}">{PHONE_ICO} Call {PHONE}</a><a class="btn ghost" href="{SMS}">Text Us</a></div>
       <ul class="trust">{lis}</ul>
     </div>
     {form(**(form_kw or {}))}
@@ -199,7 +202,7 @@ def cta_final(heading, text):
   <div><h2>{heading}</h2><p class="lead">{text}</p>
   <a class="big-phone" href="tel:{PHONE_TEL}">{PHONE}</a>
   <p style="color:#b9bccb">Tap to call. Licensed Oklahoma plumbing contractor #{LICENSE}.</p></div>
-  <div>{form(heading="Rather send a message?", sub="Fill this out and we'll call or text you back.")}</div>
+  <div>{form(heading="Call or text anytime", sub="Leave a voicemail or send a text after hours and Greg will get back to you during business hours.")}</div>
 </div></section>"""
 
 SERVICES = [
@@ -237,7 +240,7 @@ HOME_FAQ = [
     ("Do you fix water heaters or just replace them?",
      "Both, and we'd honestly rather fix it if a repair makes sense. Heating elements, thermostats, pressure relief valves and many leaks can be repaired. If the tank itself is rusting through or leaking from the body, replacement is the safer call, and we'll tell you why."),
     ("What areas do you serve?",
-     "We're based in Ponca City and serve homes and businesses across Ponca City and the nearby communities. Not sure if you're in range? Call <a href=\"tel:" + PHONE_TEL + "\">" + PHONE + "</a> and ask."),
+     "We serve homes and businesses in Ponca City, McCord (just across the bridge on Highway 60), Newkirk and Tonkawa. Somewhere close by and not sure if you're in range? Call or text <a href=\"tel:" + PHONE_TEL + "\">" + PHONE + "</a> and ask."),
     ("Are you licensed and insured?",
      "Yes. Parr Plumbing is a fully licensed and insured Oklahoma plumbing contractor, license #" + LICENSE + "."),
     ("Do you install tankless water heaters?",
@@ -245,7 +248,9 @@ HOME_FAQ = [
     ("Do you work on commercial plumbing?",
      "Yes. Along with homes, we handle plumbing repairs and installs for businesses around Ponca City."),
     ("What's the fastest way to get help?",
-     "Call <a href=\"tel:" + PHONE_TEL + "\">" + PHONE + "</a>. If you can't talk right now, send a request through the form and we'll get back to you."),
+     "Call or text <a href=\"tel:" + PHONE_TEL + "\">" + PHONE + "</a>. If you can't talk right now, a text works great. Tell us what's going on and send a photo if you can."),
+    ("What are your hours?",
+     "Monday through Saturday, 9 AM to 6 PM. We're closed Sunday. Texts and voicemails left after hours get answered the next business day."),
 ]
 
 home = head("Plumber in Ponca City, OK | Water Heater Repair & Replacement | Parr Plumbing",
@@ -257,6 +262,7 @@ home += hero("Your local water heater specialist",
              "plumber-checking-water-heater-ponca-city-ok",
              [f"Licensed &amp; insured Oklahoma plumbing contractor, #{LICENSE}",
               "Owned by Greg Parr, a lifetime Ponca City resident",
+              f"Serving {AREA}",
               "Water heater repair and replacement is our specialty",
               "Tank and tankless, gas and electric, all makes and models"])
 home += f"""<section><div class="container grid-2">
@@ -289,10 +295,30 @@ home += f"""<section class="alt"><div class="container grid-2">
 home += f"""<section><div class="container">
   <div class="section-head"><span class="eyebrow">How it works</span><h2>Getting help is simple</h2></div>
   <ol class="steps">
-    <li><h3>Call or send a request</h3><p>Call <a href="tel:{PHONE_TEL}">{PHONE}</a> or use the form. Tell us what's happening, like no hot water, a leak or a jammed disposal.</p></li>
+    <li><h3>Call or text</h3><p>Call or text <a href="tel:{PHONE_TEL}">{PHONE}</a>. Tell us what's happening, like no hot water, a leak or a jammed disposal.</p></li>
     <li><h3>We find the problem</h3><p>We'll diagnose it, explain what's wrong in plain English and give you your options before any work starts.</p></li>
     <li><h3>We fix it right</h3><p>We make the repair or install, test everything, clean up after ourselves and make sure you're happy before we leave.</p></li>
   </ol>
+</div></section>"""
+home += f"""<section class="alt"><div class="container grid-2 top">
+  <div>
+    <span class="eyebrow">Service area</span>
+    <h2>Plumbing service in Ponca City and nearby towns</h2>
+    <p>Parr Plumbing is a mobile plumbing service, so we come to you. No shop to drive to. We cover Ponca City plus a few close neighbors:</p>
+    <ul class="list">
+      <li><b>Ponca City</b> and all of town</li>
+      <li><b>McCord</b>, just across the bridge on Highway 60</li>
+      <li><b>Newkirk</b>, north of Ponca</li>
+      <li><b>Tonkawa</b>, west of Ponca on Highway 60</li>
+    </ul>
+    <p style="margin-top:14px">Close by but not on the list? Call or text <a href="tel:{PHONE_TEL}">{PHONE}</a> and ask.</p>
+  </div>
+  <div class="card" style="border-top:6px solid var(--yellow)">
+    <h3>Hours</h3>
+    <ul class="list"><li>Monday to Saturday: 9 AM to 6 PM</li><li>Sunday: Closed</li></ul>
+    <h3 style="margin-top:18px">How to reach us</h3>
+    <ul class="list"><li>Call: <a href="tel:{PHONE_TEL}">{PHONE}</a></li><li>Text: <a href="{SMS}">{PHONE}</a></li></ul>
+  </div>
 </div></section>"""
 home += faq_block(HOME_FAQ, "Questions Ponca City homeowners ask us")
 home += cta_final("Need a plumber in Ponca City today?", "Whether it's a water heater that quit or a leak you can't track down, give us a call. We'll help you figure out what's going on.")
@@ -612,7 +638,7 @@ WF_BODY = f"""<section><div class="container grid-2 top">
   <div class="prose">
     <h2>Installed by a licensed plumber</h2>
     <p>An RO system connects to your water supply and your drain, so a clean, leak free install matters. We'll mount the system, tie it into your plumbing, add the faucet, test for leaks and flush it so it's ready to use.</p>
-    <div class="callout"><p>Want one installed? <a href="tel:{PHONE_TEL}">Call {PHONE}</a> or send a request and we'll set up a time.</p></div>
+    <div class="callout"><p>Want one installed? <a href="tel:{PHONE_TEL}">Call</a> or <a href="{SMS}">text {PHONE}</a> and we'll set up a time.</p></div>
   </div>
 </div></section>"""
 service_page("/water-filtration-ponca-city-ok/",
@@ -661,7 +687,7 @@ sv += f"""<section class="alt"><div class="container grid-2 top">
   </div>
 </div></section>"""
 sv += faq_block(SV_FAQ, "Plumbing service questions")
-sv += cta_final("Need a plumber?", "Call now or send a request. We'll help you figure out what's going on.")
+sv += cta_final("Need a plumber?", "Call or text now. We'll help you figure out what's going on.")
 sv += FOOT
 write("/services/", sv)
 
@@ -704,50 +730,31 @@ ab += f"""<section class="hero" style="padding:52px 0">
         <li>Licensed contractor for over a decade</li>
         <li>Lifetime Ponca City resident</li>
         <li>Residential and commercial plumbing</li>
-        <li>Phone: <a href="tel:{PHONE_TEL}">{PHONE}</a></li>
+        <li>Call or text: <a href="tel:{PHONE_TEL}">{PHONE}</a></li>
+        <li>Hours: Mon to Sat, 9 AM to 6 PM</li>
+        <li>Serving {AREA}</li>
       </ul>
     </div>
   </div>
 </div></section>"""
 ab += service_cards(heading="What Greg can help with")
-ab += cta_final("Give Greg a call", "Water heater, leak or something else? Call and tell us what's going on.")
+ab += cta_final("Give Greg a call or text", "Water heater, leak or something else? Call or text and tell him what's going on.")
 ab += FOOT
 write("/about/", ab)
 
 # ================================================================ CONTACT
 trail = [("Home", "/"), ("Contact", "/contact/")]
 ct = head("Contact Parr Plumbing | Plumber in Ponca City, OK | (580) 304-4967",
-          "Contact Parr Plumbing, a licensed plumber in Ponca City, OK. Call (580) 304-4967 or send a service request for water heater repair, leaks, disposals and more.",
+          "Contact Parr Plumbing, a licensed plumber in Ponca City, OK. Call or text (580) 304-4967 for water heater repair, leaks, disposals and more. Serving Ponca City, McCord, Newkirk and Tonkawa.",
           "/contact/", [crumbs_schema(trail)])
-ct += hero("Call or send a request", "Contact Parr Plumbing in Ponca City, OK",
-           "The fastest way to reach us is a phone call. If you can't talk right now, fill out the form and we'll get back to you.",
+ct += hero("Call or text", "Contact Parr Plumbing in Ponca City, OK",
+           "Call or text (580) 304-4967 and you'll reach Greg directly. Can't talk right now? Send a text with what's going on, and a photo if you can.",
            "plumber-checking-water-heater-ponca-city-ok",
-           [f'Phone: <a href="tel:{PHONE_TEL}" style="color:#f9d71c">{PHONE}</a>', "Serving Ponca City, OK and nearby communities",
+           [f'Call or text: <a href="tel:{PHONE_TEL}" style="color:#f9d71c">{PHONE}</a>', "Monday to Saturday, 9 AM to 6 PM. Closed Sunday.", f"Serving {AREA}",
             f"Licensed Oklahoma plumbing contractor #{LICENSE}", "Residential and commercial plumbing"], trail=trail)
 ct += service_cards(heading="What can we help with?")
 ct += FOOT
 write("/contact/", ct)
-
-# ================================================================ THANK YOU
-ty = head("Thanks! We Got Your Request | Parr Plumbing", "Your Parr Plumbing service request was received.", "/thank-you/", robots="noindex, follow")
-ty += f"""<section class="hero"><img class="hero-bg" src="/img/plumber-checking-water-heater-ponca-city-ok-sm.webp" alt="">
-<div class="container" style="max-width:820px">
-  <span class="eyebrow">Request received</span>
-  <h1>Thanks, we got your request</h1>
-  <p class="lead">We'll reach out soon by phone or text. If it's urgent, like water on the floor or no hot water at all, don't wait on us. Call now.</p>
-  <div class="hero-cta"><a class="btn" href="tel:{PHONE_TEL}">{PHONE_ICO} Call {PHONE}</a></div>
-</div></section>
-<section><div class="container">
-  <div class="section-head"><h2>What happens next</h2></div>
-  <ol class="steps">
-    <li><h3>We review it</h3><p>We'll look over what you sent so we know what we're walking into.</p></li>
-    <li><h3>We get in touch</h3><p>We'll call or text you back to ask any questions and set up a time.</p></li>
-    <li><h3>We fix it</h3><p>We diagnose it, give you the price before we start and get it working again.</p></li>
-  </ol>
-  <div class="callout" style="max-width:760px"><p><b>While you wait:</b> if there's a leak, shut off the nearest water valve or the main. For a leaking water heater, close the cold water valve on top and turn off the gas or breaker.</p></div>
-</div></section>"""
-ty += FOOT
-write("/thank-you/", ty)
 
 # ================================================================ PRIVACY
 pv = head("Privacy Policy | Parr Plumbing", "Privacy policy for parrplumbing.com.", "/privacy/")
@@ -755,15 +762,13 @@ pv += f"""<section><div class="container prose">
   <h1>Privacy Policy</h1>
   <p style="margin-top:14px">This policy explains what information Parr Plumbing collects on parrplumbing.com and how we use it.</p>
   <h2>Information you give us</h2>
-  <p>When you fill out our service request form, we collect what you enter: your name, phone number, email (if provided) and details about your plumbing needs. We use it only to respond to your request and provide service.</p>
-  <h2>How form submissions are delivered</h2>
-  <p>Our form is processed by FormSubmit, a third party form service that delivers your submission to us by email. Their handling of data is covered by their own privacy policy.</p>
+  <p>This website doesn't use contact forms. If you call or text us, we use your name, number and the details you share only to respond and provide plumbing service.</p>
   <h2>Information collected automatically</h2>
   <p>Like most websites, our hosting provider may log basic technical information such as IP address, browser type and pages visited for security and performance.</p>
   <h2>Sharing</h2>
   <p>We don't sell, rent or trade your personal information. We only share it with service providers who help us run this website and our business, or when required by law.</p>
   <h2>Contact</h2>
-  <p>To ask us to update or delete information you've sent, call <a href="tel:{PHONE_TEL}">{PHONE}</a>.</p>
+  <p>To ask us to update or delete information you've shared, call or text <a href="tel:{PHONE_TEL}">{PHONE}</a>.</p>
 </div></section>"""
 pv += FOOT
 write("/privacy/", pv)
@@ -784,7 +789,7 @@ PAGES = ["/", "/water-heater-repair-ponca-city-ok/", "/water-heater-replacement-
          "/garbage-disposal-repair-ponca-city-ok/", "/water-filtration-ponca-city-ok/", "/services/", "/about/", "/contact/", "/privacy/"]
 (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     "".join(f"  <url><loc>{SITE}{p}</loc></url>\n" for p in PAGES) + "</urlset>\n")
-(ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /thank-you/\n\nSitemap: {SITE}/sitemap.xml\n")
+(ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
 (ROOT / "site.webmanifest").write_text(json.dumps({"name": BIZ, "short_name": "Parr Plumbing",
     "icons": [{"src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png"}],
     "theme_color": "#12131f", "background_color": "#ffffff", "display": "browser"}))
@@ -796,4 +801,4 @@ PAGES = ["/", "/water-heater-repair-ponca-city-ok/", "/water-heater-replacement-
 /contact-us /contact/ 301
 /contact-us/ /contact/ 301
 """)
-print("Built", len(PAGES) + 2, "pages into", ROOT)
+print("Built", len(PAGES) + 1, "pages into", ROOT)
