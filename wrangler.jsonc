@@ -1,6 +1,10 @@
 {
   "name": "parrplumbing",
   "compatibility_date": "2026-10-01",
+  "routes": [
+    { "pattern": "parrplumbing.com", "custom_domain": true },
+    { "pattern": "www.parrplumbing.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./public",
     "html_handling": "auto-trailing-slash",
