@@ -803,5 +803,6 @@ INDEXNOW_KEY = "18f7aba30490cbc419dfd18c131c3d6a"
 /about-us/ /about/ 301
 /contact-us /contact/ 301
 /contact-us/ /contact/ 301
+/services /services/ 301
 """)
 print("Built", len(PAGES) + 1, "pages into", ROOT)
