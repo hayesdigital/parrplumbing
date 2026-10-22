@@ -40,7 +40,7 @@ BUSINESS = {
     "address": {"@type": "PostalAddress", "addressLocality": "Ponca City", "addressRegion": "OK", "addressCountry": "US"},
     "areaServed": [{"@type": "City", "name": t + ", OK"} for t in ["Ponca City", "McCord", "Newkirk", "Tonkawa"]],
     "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "opens": "09:00", "closes": "18:00"}],
-    "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_TEL, "contactType": "customer service", "contactOption": "Call or text", "areaServed": "US-OK", "availableLanguage": "English"},
+    "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_TEL, "contactType": "customer service", "areaServed": "US-OK", "availableLanguage": "English"},
     "founder": {"@type": "Person", "@id": SITE + "/#greg", "name": "Greg Parr", "jobTitle": "Owner and Licensed Plumbing Contractor", "url": SITE + "/about/"},
     "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "license",
                       "name": "Oklahoma Plumbing Contractor License #" + LICENSE,
@@ -757,7 +757,7 @@ ct += FOOT
 write("/contact/", ct)
 
 # ================================================================ PRIVACY
-pv = head("Privacy Policy | Parr Plumbing", "Privacy policy for parrplumbing.com.", "/privacy/")
+pv = head("Privacy Policy | Parr Plumbing", "How Parr Plumbing handles the information you share when you call, text or visit parrplumbing.com, the website for our Ponca City, OK plumbing service.", "/privacy/")
 pv += f"""<section><div class="container prose">
   <h1>Privacy Policy</h1>
   <p style="margin-top:14px">This policy explains what information Parr Plumbing collects on parrplumbing.com and how we use it.</p>
@@ -793,6 +793,9 @@ PAGES = ["/", "/water-heater-repair-ponca-city-ok/", "/water-heater-replacement-
 (ROOT / "site.webmanifest").write_text(json.dumps({"name": BIZ, "short_name": "Parr Plumbing",
     "icons": [{"src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png"}],
     "theme_color": "#12131f", "background_color": "#ffffff", "display": "browser"}))
+# IndexNow key file (Bing, Yandex and other IndexNow engines)
+INDEXNOW_KEY = "18f7aba30490cbc419dfd18c131c3d6a"
+(ROOT / f"{INDEXNOW_KEY}.txt").write_text(INDEXNOW_KEY)
 # old GoHighLevel URLs -> new pages
 (ROOT / "_redirects").write_text("""/home / 301
 /home/ / 301

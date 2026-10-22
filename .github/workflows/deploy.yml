@@ -14,3 +14,9 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.151.3"
           command: deploy
+      - name: Ping IndexNow with every page in the sitemap
+        run: |
+          URLS=$(grep -o '<loc>[^<]*' public/sitemap.xml | sed 's/<loc>//' | jq -R . | jq -s -c .)
+          curl -s -o /dev/null -w "IndexNow: %{http_code}\n" -X POST https://api.indexnow.org/indexnow \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "{\"host\":\"parrplumbing.com\",\"key\":\"18f7aba30490cbc419dfd18c131c3d6a\",\"keyLocation\":\"https://parrplumbing.com/18f7aba30490cbc419dfd18c131c3d6a.txt\",\"urlList\":$URLS}"
