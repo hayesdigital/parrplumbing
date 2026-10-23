@@ -806,3 +806,25 @@ INDEXNOW_KEY = "18f7aba30490cbc419dfd18c131c3d6a"
 /services /services/ 301
 """)
 print("Built", len(PAGES) + 1, "pages into", ROOT)
+
+
+# ---- llms.txt: plain-text site summary for AI crawlers, built from the finished pages ----
+import html as _html, re as _re
+def _meta(p):
+    t = p.read_text(encoding="utf-8")
+    g = lambda pat: (_html.unescape(m.group(1)).strip() if (m := _re.search(pat, t, _re.I | _re.S)) else "")
+    return (g(r"<title>(.*?)</title>"),
+            g(r'<meta\s+name="description"\s+content="([^"]*)"'),
+            g(r'<meta\s+property="og:site_name"\s+content="([^"]*)"'))
+_locs = _re.findall(r"<loc>([^<]+)</loc>", (ROOT / "sitemap.xml").read_text(encoding="utf-8"))
+_rows = []
+for _u in _locs:
+    _path = _u[len(SITE):].strip("/")
+    _f = ROOT / _path / "index.html" if _path else ROOT / "index.html"
+    if _f.exists():
+        _rows.append((_u,) + _meta(_f))
+_home = next((r for r in _rows if r[0].rstrip("/") == SITE), _rows[0])
+_name = _home[3] or _home[1].split("|")[-1].strip()
+_out = [f"# {_name}", "", f"> {_home[2]}", "", "## Pages", ""]
+_out += [f"- [{t}]({u}): {d}" if d else f"- [{t}]({u})" for u, t, d, _ in _rows]
+(ROOT / "llms.txt").write_text("\n".join(_out) + "\n", encoding="utf-8")
